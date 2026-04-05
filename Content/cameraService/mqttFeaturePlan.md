@@ -24,8 +24,8 @@ aw topics.
 
 ### 0. Agent Team Setup & Assignment
 - [ ] **Manager Agent**: Oversees the project, orchestrates sub-agents, and verifies final integration.
-- [ ] **Unreal C++ Expert Agent**: Handles C++ core logic, MQTT connections, parsers, and Cesium API integration. (Assigned Steps 1-4)
-- [ ] **Blueprint & UI Agent**: Handles Blueprint parameter exposure, Editor utilities, and UMG interfaces. (Assigned Step 5)
+- [ ] **Python & Middleware Agent**: Handles external Python script, MQTT connections (`paho-mqtt`), JSON parsing, and OSC/WebSocket transmission to Unreal. (Assigned Steps 1-2)
+- [ ] **Blueprint & UI Agent**: Handles receiving live data in Unreal Editor/Runtime, Cesium integration, rendering offsets, and UMG interfaces. (Assigned Steps 3-5)
 - [ ] **QA & Validation Agent**: Executes testing, validation, and verifies fallback scenarios. (Assigned Step 6)
 - [ ] **Technical Writing Agent**: Produces comprehensive project documentation and instructions. (Assigned Step 7)
 
@@ -33,32 +33,32 @@ aw topics.
 - [x] Initialize a Git repository with standard Unreal Engine `.gitignore`.
 - [x] Connect the local repository to a new or existing remote GitHub repository matching your settings.
 
-### 1. Setup & Configuration (Assigned to: Unreal C++ Expert Agent)
-- [ ] Create an Unreal Engine standard settings object or blueprint-exposable variables for MQTT connection parameters (IP: 10.0.0.74, Port: 1883).
-- [ ] Enable and utilize Unreal Engine's native Experimental MQTT plugin as the core client.
+### 1. Python Environment Setup & Configuration (Assigned to: Python & Middleware Agent)
+- [x] Create a standalone Python virtual environment (`venv`) for development to isolate dependencies.
+- [x] Install required Python packages (`paho-mqtt` for MQTT connection, `python-osc` to bridge to Unreal Engine).
+- [x] Enable Unreal Engine's native OSC (Open Sound Control) plugin to receive data from Python.
 
-### 2. MQTT Subscription & Parsing (Assigned to: Unreal C++ Expert Agent)
-- [ ] Read and parse channelList.json to extract relevant subscription topics (Lat, Long, Alt, and camera1 components).
-- [ ] Build a runtime unit test/logger for the MQTT JSON feed to inspect and determine the exact payload format dynamically.
-- [ ] Implement a C++ MQTT listener component that subscribes to the processed topics by default.
-- [ ] Create parsers for the incoming MQTT payload to extract positional floats/doubles (Lat, Long, Alt).
-- [ ] **Topic Fallback Logic:** Add logic to detect if processed topics return empty data. If empty, trigger a debug/UI flag and automatically (or optionally) roll over to subscribe to raw topics.
+### 2. Python MQTT Subscription & Parsing (Assigned to: Python & Middleware Agent)
+- [x] Develop a Python script that connects to the broker (IP: 10.0.0.74, Port: 1883).
+- [x] Read and parse `channelList.json` in Python to extract relevant subscription topics (Lat, Long, Alt, and camera1 components).
+- [x] Extract positional floats/doubles (Lat, Long, Alt) and camera rotation/offsets from the incoming JSON payload.
+- [x] **Topic Fallback Logic:** Add logic in Python to detect if processed topics return empty data. If empty, print a warning and roll over to raw topics.
+- [x] Package the parsed float data into OSC messages and transmit them to a local Unreal Engine OSC server port.
 
-### 3. Core Geospatial Integration (Cesium Tools) (Assigned to: Unreal C++ Expert Agent)
-- [ ] Implement a C++ function to convert incoming Altitude MSL (feet) to meters as required by Cesium/Unreal.
-- [ ] Use CesiumGeoreference or the Cesium C++ API to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates.
+### 3. Core Geospatial Integration (Cesium Tools) (Assigned to: Blueprint & UI Agent)
+- [ ] Create an Unreal Engine Blueprint (OSC Server) that listens for the packed Python messages.
+- [ ] Implement a Blueprint function to convert incoming Altitude MSL (feet) to meters as required by Cesium/Unreal.
+- [ ] Use `CesiumGeoreference` Blueprint nodes to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates.
 - [ ] Update the primary Actor's world transform based on the converted data.
 
-### 4. Camera Offset Integration (Assigned to: Unreal C++ Expert Agent)
-- [ ] Extract camera1 offset data (camera1Xoffset, camera1Yoffset, camera1Zoffset in meters).
-- [ ] Extract camera1 rotation data (camera1Xrotation, camera1Yrotation, camera1Zrotation).
-- [ ] Create a generic, modular C++ function to calculate the local transform relative to the main Actor's center of gravity that can accept any camera type.
-- [ ] Apply the offset transform and rotations specifically to a target OWL Cine Camera, ensuring it works seamlessly with standard Unreal Cine Cameras if swapped out.
+### 4. Camera Offset Integration (Assigned to: Blueprint & UI Agent)
+- [ ] Receive OSC messages containing camera1 offset data (X, Y, Z in meters) and rotation data.
+- [ ] Create a generic, modular Blueprint function to calculate the local transform relative to the main Actor's center of gravity.
+- [ ] Apply the offset transform and rotations specifically to a target OWL Cine Camera via Blueprint.
 
 ### 5. Debugging & UI Integration (Assigned to: Blueprint & UI Agent)
-- [ ] Create an Editor utility or debugging tool that connects and validates the MQTT feed natively in the Editor, bypassing the need to enter 'Play In Editor' (PIE) mode.
-- [ ] Implement Blueprint-callable getters or delegates within the C++ code to broadcast real-time position and rotation data, making it directly accessible to the Unreal Engine UI (UMG) layer.
-- [ ] Surface the "Empty Processed Topic / Using Raw Topic" warning in the UI via the previously mentioned flag.
+- [ ] Create an Editor utility or debugging UI in Unreal that visualizes the incoming OSC stream from the Python script.
+- [ ] Surface any fallback warnings (Raw vs Processed topics) routed from Python or detected locally via the UI.
 
 ### 6. Testing & Validation (Assigned to: QA & Validation Agent)
 - [ ] Verify connection to 10.0.0.74:1883 in Editor.
