@@ -45,16 +45,16 @@ aw topics.
 - [x] **Topic Fallback Logic:** Add logic in Python to detect if processed topics return empty data. If empty, print a warning and roll over to raw topics.
 - [x] Package the parsed float data into OSC messages and transmit them to a local Unreal Engine OSC server port.
 
-### 3. Core Geospatial Integration (Cesium Tools) (Assigned to: Blueprint & UI Agent)
-- [ ] Create an Unreal Engine Blueprint (OSC Server) that listens for the packed Python messages.
-- [ ] Implement a Blueprint function to convert incoming Altitude MSL (feet) to meters as required by Cesium/Unreal.
-- [ ] Use `CesiumGeoreference` Blueprint nodes to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates.
+### 3. Core Geospatial Integration (Cesium Tools) (Assigned to: Unreal C++ Expert Agent)
+- [x] Create an Unreal Engine C++ class (`GenesisOSCReceiver`) that statically listens for the packed Python messages via `OSCManager`.
+- [x] Implement C++ float parsing that maps string commands (e.g. `/genesis/latitude`) to live C++ float variables.
+- [ ] Use `CesiumGeoreference` logic to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates via the created Receiver Actor.
 - [ ] Update the primary Actor's world transform based on the converted data.
 
-### 4. Camera Offset Integration (Assigned to: Blueprint & UI Agent)
-- [ ] Receive OSC messages containing camera1 offset data (X, Y, Z in meters) and rotation data.
-- [ ] Create a generic, modular Blueprint function to calculate the local transform relative to the main Actor's center of gravity.
-- [ ] Apply the offset transform and rotations specifically to a target OWL Cine Camera via Blueprint.
+### 4. Camera Offset Integration (Assigned to: Unreal C++ Expert Agent)
+- [x] Catch OSC messages containing camera1 offset data and convert them directly from meters to Unreal's standard units (centimeters).
+- [x] Reconstruct Rotation (`FRotator`) and Position (`FVector`) into structured Unreal Engine variables inside the receiver.
+- [ ] Apply the offset transform and rotations specifically to a target OWL Cine Camera.
 
 ### 5. Debugging & UI Integration (Assigned to: Blueprint & UI Agent)
 - [ ] Create an Editor utility or debugging UI in Unreal that visualizes the incoming OSC stream from the Python script.
