@@ -7,7 +7,7 @@
 
 AGenesisOSCReceiver::AGenesisOSCReceiver()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	OSCServer = nullptr;
 }
 
@@ -75,6 +75,31 @@ void AGenesisOSCReceiver::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+void AGenesisOSCReceiver::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Push geo position to Cesium world origin
+	if (bGeoUpdated && IsValid(GeoreferenceTarget))
+	{
+		GeoreferenceTarget->SetOriginLongitudeLatitudeHeight(
+			static_cast<double>(Longitude),
+			static_cast<double>(Latitude),
+			static_cast<double>(AltitudeMSL));
+		bGeoUpdated = false;
+		UE_LOG(LogTemp, Verbose, TEXT("GenesisOSCReceiver: Georeference updated -> Lat:%.6f Lon:%.6f Alt:%.2f"), Latitude, Longitude, AltitudeMSL);
+	}
+
+	// Push offset + rotation to the camera actor
+	if (bCameraUpdated && IsValid(Camera1Actor))
+	{
+		Camera1Actor->SetActorLocation(Camera1Offset);
+		Camera1Actor->SetActorRotation(Camera1Rotation);
+		bCameraUpdated = false;
+		UE_LOG(LogTemp, Verbose, TEXT("GenesisOSCReceiver: Camera1 updated -> Offset:%s Rot:%s"), *Camera1Offset.ToString(), *Camera1Rotation.ToString());
+	}
+}
+
 void AGenesisOSCReceiver::OnOSCMessageReceived(const FOSCMessage& Message, const FString& IPAddress, int32 Port)
 {
 	FString Address = UOSCManager::GetOSCMessageAddress(Message).GetFullPath();
@@ -86,40 +111,49 @@ void AGenesisOSCReceiver::OnOSCMessageReceived(const FOSCMessage& Message, const
 		if (Address.Equals(TEXT("/genesis/latitude"), ESearchCase::IgnoreCase))
 		{
 			Latitude = FloatVal;
+			bGeoUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/longitude"), ESearchCase::IgnoreCase))
 		{
 			Longitude = FloatVal;
+			bGeoUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/altitudeMSL"), ESearchCase::IgnoreCase))
 		{
 			AltitudeMSL = FloatVal;
+			bGeoUpdated = true;
 		}
 		// --- Camera 1 Offsets ---
 		else if (Address.Equals(TEXT("/genesis/camera1Xoffset"), ESearchCase::IgnoreCase))
 		{
 			Camera1Offset.X = FloatVal * 100.0f; // Convert meters to cm for Unreal
+			bCameraUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/camera1Yoffset"), ESearchCase::IgnoreCase))
 		{
 			Camera1Offset.Y = FloatVal * 100.0f; // Convert meters to cm for Unreal
+			bCameraUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/camera1Zoffset"), ESearchCase::IgnoreCase))
 		{
 			Camera1Offset.Z = FloatVal * 100.0f; // Convert meters to cm for Unreal
+			bCameraUpdated = true;
 		}
 		// --- Camera 1 Rotations ---
 		else if (Address.Equals(TEXT("/genesis/camera1Xrotation"), ESearchCase::IgnoreCase))
 		{
 			Camera1Rotation.Roll = FloatVal;
+			bCameraUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/camera1Yrotation"), ESearchCase::IgnoreCase))
 		{
 			Camera1Rotation.Pitch = FloatVal;
+			bCameraUpdated = true;
 		}
 		else if (Address.Equals(TEXT("/genesis/camera1Zrotation"), ESearchCase::IgnoreCase))
 		{
 			Camera1Rotation.Yaw = FloatVal;
+			bCameraUpdated = true;
 		}
 	}
 }
