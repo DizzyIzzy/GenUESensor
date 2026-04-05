@@ -40,7 +40,7 @@ aw topics.
 
 ### 2. Python MQTT Subscription & Parsing (Assigned to: Python & Middleware Agent)
 - [x] Develop a Python script that connects to the broker (IP: 10.0.0.74, Port: 1883).
-- [x] Read and parse `channelList.json` in Python to extract relevant subscription topics (Lat, Long, Alt, and camera1 components).
+- [x] Read and parse `channelList.conf` in Python to extract relevant subscription topics (Lat, Long, Alt, and camera1 components).
 - [x] Extract positional floats/doubles (Lat, Long, Alt) and camera rotation/offsets from the incoming JSON payload.
 - [x] **Topic Fallback Logic:** Add logic in Python to detect if processed topics return empty data. If empty, print a warning and roll over to raw topics.
 - [x] Package the parsed float data into OSC messages and transmit them to a local Unreal Engine OSC server port.

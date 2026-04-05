@@ -95,9 +95,9 @@ def main():
     parser.add_argument("--osc-port", type=int, default=DEFAULT_OSC_PORT, help="Unreal Engine OSC UDP Server Port")
     args = parser.parse_args()
 
-    json_path = os.path.join(os.path.dirname(__file__), "..", "channelList.json")
+    json_path = os.path.join(os.path.dirname(__file__), "..", "channelList.conf")
     if not os.path.exists(json_path):
-        print(f"[ERROR] channelList.json not found at {json_path}")
+        print(f"[ERROR] channelList.conf not found at {json_path}")
         return
 
     topics_map = load_topics(json_path)
