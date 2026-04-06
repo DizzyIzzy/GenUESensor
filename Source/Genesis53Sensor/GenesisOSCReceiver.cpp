@@ -80,15 +80,17 @@ void AGenesisOSCReceiver::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Push geo position to Cesium world origin
+	// AltitudeMSL arrives in feet MSL from the broker — convert to meters for Cesium
+	const double AltitudeMeters = static_cast<double>(AltitudeMSL) * 0.3048;
 	if (bGeoUpdated && IsValid(GeoreferenceTarget))
 	{
 		FVector LongLatHeight(
 			static_cast<double>(Longitude),
 			static_cast<double>(Latitude),
-			static_cast<double>(AltitudeMSL));
+			AltitudeMeters);
 		GeoreferenceTarget->SetOriginLongitudeLatitudeHeight(LongLatHeight);
 		bGeoUpdated = false;
-		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Georeference updated -> Lat:%.6f Lon:%.6f Alt:%.2f"), Latitude, Longitude, AltitudeMSL);
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Georeference updated -> Lat:%.6f Lon:%.6f AltFt:%.1f AltM:%.1f"), Latitude, Longitude, AltitudeMSL, AltitudeMeters);
 	}
 	else if (bGeoUpdated)
 	{
@@ -96,17 +98,17 @@ void AGenesisOSCReceiver::Tick(float DeltaTime)
 		bGeoUpdated = false;
 	}
 
-	// Push offset + rotation to the camera actor
-	if (bCameraUpdated && IsValid(Camera1Actor))
+	// Push offset + rotation to the camera actor as a RELATIVE transform
+	// so it moves correctly when parented to the platform/georeference hierarchy
+	if (bCameraUpdated)
 	{
-		Camera1Actor->SetActorLocation(Camera1Offset);
-		Camera1Actor->SetActorRotation(Camera1Rotation);
-		bCameraUpdated = false;
-		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Camera1 updated -> Offset:%s Rot:%s"), *Camera1Offset.ToString(), *Camera1Rotation.ToString());
-	}
-	else if (bCameraUpdated)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Camera data received but Camera1Actor is NOT set."));
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Camera1 data -> Offset(cm):%s Rot:%s | Actor valid: %s"),
+			*Camera1Offset.ToString(), *Camera1Rotation.ToString(), IsValid(Camera1Actor) ? TEXT("YES") : TEXT("NO — assign Camera1Actor in Details panel"));
+		if (IsValid(Camera1Actor))
+		{
+			Camera1Actor->SetActorRelativeLocation(Camera1Offset);
+			Camera1Actor->SetActorRelativeRotation(Camera1Rotation);
+		}
 		bCameraUpdated = false;
 	}
 }
