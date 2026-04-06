@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 from pythonosc.udp_client import SimpleUDPClient
 
 # Default Config
-DEFAULT_BROKER_IP = "10.0.0.74"
+DEFAULT_BROKER_IP = "10.0.0.17"
 DEFAULT_BROKER_PORT = 1883
 DEFAULT_OSC_IP = "127.0.0.1"
 DEFAULT_OSC_PORT = 8000 # Default unreal OSC port
@@ -15,7 +15,8 @@ DEFAULT_OSC_PORT = 8000 # Default unreal OSC port
 TARGET_CHANNELS = [
     "latitude", "longitude", "altitudeMSL",
     "camera1Xoffset", "camera1Yoffset", "camera1Zoffset",
-    "camera1Xrotation", "camera1Yrotation", "camera1Zrotation"
+    "camera1Xrotation", "camera1Yrotation", "camera1Zrotation",
+    "camera1Zoom", "camera1Xfov", "camera1Yfov", "camera1Spectrum"
 ]
 
 # Track state
@@ -74,7 +75,12 @@ def on_message(client, userdata, msg):
         return
 
     try:
-        value = float(payload)
+        # Payloads are either a plain float or a JSON object {"v": <float>, ...}
+        try:
+            parsed = json.loads(payload)
+            value = float(parsed["v"])
+        except (json.JSONDecodeError, KeyError, TypeError):
+            value = float(payload)
         
         # We will use /genesis/channel as our OSC address protocol
         # Example: /genesis/latitude

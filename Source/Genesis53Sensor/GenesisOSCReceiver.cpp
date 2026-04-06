@@ -82,12 +82,18 @@ void AGenesisOSCReceiver::Tick(float DeltaTime)
 	// Push geo position to Cesium world origin
 	if (bGeoUpdated && IsValid(GeoreferenceTarget))
 	{
-		GeoreferenceTarget->SetOriginLongitudeLatitudeHeight(
+		FVector LongLatHeight(
 			static_cast<double>(Longitude),
 			static_cast<double>(Latitude),
 			static_cast<double>(AltitudeMSL));
+		GeoreferenceTarget->SetOriginLongitudeLatitudeHeight(LongLatHeight);
 		bGeoUpdated = false;
-		UE_LOG(LogTemp, Verbose, TEXT("GenesisOSCReceiver: Georeference updated -> Lat:%.6f Lon:%.6f Alt:%.2f"), Latitude, Longitude, AltitudeMSL);
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Georeference updated -> Lat:%.6f Lon:%.6f Alt:%.2f"), Latitude, Longitude, AltitudeMSL);
+	}
+	else if (bGeoUpdated)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Geo data received but GeoreferenceTarget is NOT set. Assign it in the Details panel."));
+		bGeoUpdated = false;
 	}
 
 	// Push offset + rotation to the camera actor
@@ -96,13 +102,19 @@ void AGenesisOSCReceiver::Tick(float DeltaTime)
 		Camera1Actor->SetActorLocation(Camera1Offset);
 		Camera1Actor->SetActorRotation(Camera1Rotation);
 		bCameraUpdated = false;
-		UE_LOG(LogTemp, Verbose, TEXT("GenesisOSCReceiver: Camera1 updated -> Offset:%s Rot:%s"), *Camera1Offset.ToString(), *Camera1Rotation.ToString());
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Camera1 updated -> Offset:%s Rot:%s"), *Camera1Offset.ToString(), *Camera1Rotation.ToString());
+	}
+	else if (bCameraUpdated)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Camera data received but Camera1Actor is NOT set."));
+		bCameraUpdated = false;
 	}
 }
 
 void AGenesisOSCReceiver::OnOSCMessageReceived(const FOSCMessage& Message, const FString& IPAddress, int32 Port)
 {
 	FString Address = UOSCManager::GetOSCMessageAddress(Message).GetFullPath();
+	UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: OSC packet received from %s:%d | Address: %s"), *IPAddress, Port, *Address);
 
 	float FloatVal = 0.0f;
 	if (UOSCManager::GetFloat(Message, 0, FloatVal))
