@@ -32,7 +32,8 @@
 				"Linux",
 				"Android",
 				"IOS"
-			]
+			],
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/87b0d05800a545d49bf858ef3458c4f7"
 		},
 		{
 			"Name": "MQTT",
@@ -60,7 +61,8 @@
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
 				"Win64"
-			]
+			],
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/362651520df94e4fa65492dbcba44ae2"
 		},
 		{
 			"Name": "OSC",
