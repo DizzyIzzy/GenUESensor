@@ -8,7 +8,7 @@ public class Genesis53Sensor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "CesiumRuntime", "Json", "JsonUtilities", "OSC" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "CesiumRuntime", "Json", "JsonUtilities", "OSC", "WebSockets" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

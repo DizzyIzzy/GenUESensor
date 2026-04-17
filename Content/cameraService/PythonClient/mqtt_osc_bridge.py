@@ -19,9 +19,9 @@ TARGET_CHANNELS = [
     "camera1Zoom", "camera1Xfov", "camera1Yfov", "camera1Spectrum"
 ]
 
-# Track state
-active_topics = {} 
-using_raw = {} 
+# Track state: channel -> which topic is currently "winning" (proc preferred)
+active_topics = {}   # topic_string -> channel_name
+topic_priority = {}  # channel_name -> "proc" | "raw"  (proc wins when both live)
 
 def load_topics(json_path):
     with open(json_path, 'r') as f:
@@ -30,49 +30,59 @@ def load_topics(json_path):
 
 def on_connect(client, userdata, flags, reason_code, properties):
     print(f"[MQTT] Connected with result code {reason_code}")
-    
+
     topics_map = userdata['topics_map']
-    
-    # Subscribe to processed topics first
+
+    # Subscribe to BOTH proc and raw for every channel at startup.
+    # Proc is preferred; raw is the automatic fallback if proc is silent.
     for channel in TARGET_CHANNELS:
-        if channel in topics_map:
-            proc_topic = topics_map[channel]["processed"]
-            
-            # Map topic -> channel
-            active_topics[proc_topic] = channel
-            using_raw[channel] = False
-            
-            client.subscribe(proc_topic)
-            print(f"[MQTT] Subscribed to {proc_topic} for {channel}")
+        if channel not in topics_map:
+            continue
+        proc_topic = topics_map[channel]["processed"]
+        raw_topic  = topics_map[channel]["raw"]
+
+        active_topics[proc_topic] = channel
+        active_topics[raw_topic]  = channel
+        topic_priority[channel]   = "raw"    # default to raw; upgrades to proc when proc data arrives
+
+        client.subscribe(proc_topic)
+        client.subscribe(raw_topic)
+        print(f"[MQTT] Subscribed to {proc_topic} and {raw_topic} for {channel}")
 
 def on_message(client, userdata, msg):
     topics_map = userdata['topics_map']
     osc_client = userdata['osc_client']
-    
-    topic = msg.topic
-    payload = msg.payload.decode('utf-8')
-    
+
+    topic   = msg.topic
+    payload = msg.payload.decode('utf-8').strip()
+
     channel = active_topics.get(topic)
     if not channel:
         return
 
-    # Fallback Logic: Empty or null processed topic 
-    if not payload or payload.strip() == "" or payload.strip() == "null":
-        if not using_raw.get(channel, False):
-            print(f"\n[WARNING] Empty payload on processed topic '{topic}' for channel '{channel}'. Rolling over to raw topic.\n")
-            
-            # Switch to raw topic
-            raw_topic = topics_map[channel]["raw"]
-            
-            client.unsubscribe(topic)
-            active_topics.pop(topic, None)
-            
-            active_topics[raw_topic] = channel
-            using_raw[channel] = True
-            
-            client.subscribe(raw_topic)
-            print(f"[MQTT] Subscribed to RAW topic {raw_topic} for {channel}")
+    # Determine whether this message is from the proc or raw topic
+    is_proc = (topic == topics_map[channel]["processed"])
+    src_label = "proc" if is_proc else "raw"
+
+    # Drop raw messages when the proc topic is actively delivering data
+    if not is_proc and topic_priority.get(channel) == "proc":
         return
+
+    # Empty / null payload — mark this source as inactive
+    if not payload or payload == "null":
+        if is_proc:
+            # proc went silent — promote raw
+            if topic_priority.get(channel) != "raw":
+                warning_msg = f"'{channel}' proc topic silent/empty — switching to raw fallback."
+                print(f"[WARNING] {warning_msg}")
+                # Send warning to Unreal via OSC
+                osc_client.send_message("/genesis/warning", warning_msg)
+                topic_priority[channel] = "raw"
+        return
+
+    # A proc message arrived — (re-)assert proc as winner
+    if is_proc:
+        topic_priority[channel] = "proc"
 
     try:
         # Payloads are either a plain float or a JSON object {"v": <float>, ...}
@@ -81,17 +91,13 @@ def on_message(client, userdata, msg):
             value = float(parsed["v"])
         except (json.JSONDecodeError, KeyError, TypeError):
             value = float(payload)
-        
-        # We will use /genesis/channel as our OSC address protocol
-        # Example: /genesis/latitude
+
         osc_address = f"/genesis/{channel}"
-        
         osc_client.send_message(osc_address, value)
-        # Uncomment below to debug prints
-        # print(f"[OSC] Sent {osc_address} : {value}")
-        
+        print(f"[OSC] {src_label} -> {osc_address} : {value:.4f}")
+
     except ValueError:
-        print(f"[ERROR] Could not parse payload as float: {payload}")
+        print(f"[ERROR] Could not parse payload as float for '{channel}': {payload}")
 
 def main():
     parser = argparse.ArgumentParser(description="MQTT to OSC Bridge for Unreal Engine")

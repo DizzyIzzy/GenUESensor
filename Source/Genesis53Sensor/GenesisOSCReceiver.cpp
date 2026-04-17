@@ -15,6 +15,25 @@ void AGenesisOSCReceiver::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Only start if enabled
+	if (bEnabled)
+	{
+		StartReceiver();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Starting disabled (bEnabled=false). Use SetEnabled(true) to activate."));
+	}
+}
+
+void AGenesisOSCReceiver::StartReceiver()
+{
+	if (bReceiverStarted)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Already started, ignoring duplicate start request."));
+		return;
+	}
+
 	// Create and Initialize the OSC Server
 	OSCServer = UOSCManager::CreateOSCServer(ReceiveIP, ReceivePort, false, true, TEXT("GenesisOSCServer"), this);
 	if (OSCServer)
@@ -55,11 +74,19 @@ void AGenesisOSCReceiver::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: Could not find Python venv executable or script at %s. Ensure you have run the python venv creation steps."), *PythonExe);
 		}
 	}
+
+	bReceiverStarted = true;
+	UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Started successfully."));
 }
 
-void AGenesisOSCReceiver::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AGenesisOSCReceiver::StopReceiver()
 {
-	// Clean up background Python Script process when the actor is destroyed
+	if (!bReceiverStarted)
+	{
+		return; // Already stopped
+	}
+
+	// Clean up background Python Script process
 	if (PythonBridgeProcessHandle.IsValid())
 	{
 		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Terminating Python Bridge background process."));
@@ -71,13 +98,33 @@ void AGenesisOSCReceiver::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		OSCServer->OnOscMessageReceived.RemoveDynamic(this, &AGenesisOSCReceiver::OnOSCMessageReceived);
 		OSCServer->Stop();
+		OSCServer = nullptr;
 	}
+
+	bReceiverStarted = false;
+	UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Stopped."));
+}
+
+void AGenesisOSCReceiver::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	StopReceiver();
 	Super::EndPlay(EndPlayReason);
 }
 
 void AGenesisOSCReceiver::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Skip processing if disabled
+	if (!bEnabled)
+	{
+		return;
+	}
+
+	// Update connection health status
+	const double CurrentTime = FPlatformTime::Seconds();
+	const double TimeSinceLastData = CurrentTime - LastDataReceivedTime;
+	bIsReceivingData = (TimeSinceLastData < 5.0); // Consider connected if data within last 5 seconds
 
 	// Push geo position to Cesium world origin
 	// AltitudeMSL arrives in feet MSL from the broker — convert to meters for Cesium
@@ -117,6 +164,21 @@ void AGenesisOSCReceiver::OnOSCMessageReceived(const FOSCMessage& Message, const
 {
 	FString Address = UOSCManager::GetOSCMessageAddress(Message).GetFullPath();
 	UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: OSC packet received from %s:%d | Address: %s"), *IPAddress, Port, *Address);
+
+	// Update last received timestamp
+	LastDataReceivedTime = FPlatformTime::Seconds();
+
+	// Check for warning messages (sent as string instead of float)
+	FString StringVal;
+	if (Address.Equals(TEXT("/genesis/warning"), ESearchCase::IgnoreCase))
+	{
+		if (UOSCManager::GetString(Message, 0, StringVal))
+		{
+			LastWarningMessage = StringVal;
+			UE_LOG(LogTemp, Warning, TEXT("GenesisOSCReceiver: FALLBACK WARNING: %s"), *StringVal);
+		}
+		return;
+	}
 
 	float FloatVal = 0.0f;
 	if (UOSCManager::GetFloat(Message, 0, FloatVal))
@@ -170,4 +232,31 @@ void AGenesisOSCReceiver::OnOSCMessageReceived(const FOSCMessage& Message, const
 			bCameraUpdated = true;
 		}
 	}
+}
+
+void AGenesisOSCReceiver::SetEnabled(bool bNewEnabled)
+{
+	if (bEnabled == bNewEnabled)
+	{
+		return; // No change
+	}
+
+	bEnabled = bNewEnabled;
+
+	if (bEnabled)
+	{
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Enabling receiver..."));
+		StartReceiver();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Disabling receiver..."));
+		StopReceiver();
+	}
+}
+
+void AGenesisOSCReceiver::ToggleEnabled()
+{
+	SetEnabled(!bEnabled);
+	UE_LOG(LogTemp, Log, TEXT("GenesisOSCReceiver: Toggled to %s"), bEnabled ? TEXT("ENABLED") : TEXT("DISABLED"));
 }

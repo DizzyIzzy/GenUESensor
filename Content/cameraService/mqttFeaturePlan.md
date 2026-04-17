@@ -48,24 +48,24 @@ aw topics.
 ### 3. Core Geospatial Integration (Cesium Tools) (Assigned to: Unreal C++ Expert Agent)
 - [x] Create an Unreal Engine C++ class (`GenesisOSCReceiver`) that statically listens for the packed Python messages via `OSCManager`.
 - [x] Implement C++ float parsing that maps string commands (e.g. `/genesis/latitude`) to live C++ float variables.
-- [ ] Use `CesiumGeoreference` logic to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates via the created Receiver Actor.
-- [ ] Update the primary Actor's world transform based on the converted data.
+- [x] Use `CesiumGeoreference` logic to transform absolute Latitude, Longitude, and Altitude coordinates into Unreal Engine world coordinates via the created Receiver Actor.
+- [x] Update the primary Actor's world transform based on the converted data.
 
 ### 4. Camera Offset Integration (Assigned to: Unreal C++ Expert Agent)
 - [x] Catch OSC messages containing camera1 offset data and convert them directly from meters to Unreal's standard units (centimeters).
 - [x] Reconstruct Rotation (`FRotator`) and Position (`FVector`) into structured Unreal Engine variables inside the receiver.
-- [ ] Apply the offset transform and rotations specifically to a target OWL Cine Camera.
+- [x] Apply the offset transform and rotations specifically to a target OWL Cine Camera.
 
 ### 5. Debugging & UI Integration (Assigned to: Blueprint & UI Agent)
-- [ ] Create an Editor utility or debugging UI in Unreal that visualizes the incoming OSC stream from the Python script.
-- [ ] Surface any fallback warnings (Raw vs Processed topics) routed from Python or detected locally via the UI.
+- [x] Create an Editor utility or debugging UI in Unreal that visualizes the incoming OSC stream from the Python script.
+- [x] Surface any fallback warnings (Raw vs Processed topics) routed from Python or detected locally via the UI.
 
 ### 6. Testing & Validation (Assigned to: QA & Validation Agent)
-- [ ] Verify connection to 10.0.0.74:1883 in Editor.
-- [ ] Validate standard movement (Lat/Long/Alt updates map to correct Cesium coordinates visually).
-- [ ] Validate camera1 offsets and rotations update smoothly and in the correct coordinate space relative to the primary transform.
-- [ ] Test the pipeline using the OWL Cine Camera to verify plugin compatibility.
-- [ ] Trigger an empty processed topic event to test the fallback to 
+- [x] Verify connection to 10.0.0.17:1883 in Editor.
+- [x] Validate standard movement (Lat/Long/Alt updates map to correct Cesium coordinates visually).
+- [x] Validate camera1 offsets and rotations update smoothly and in the correct coordinate space relative to the primary transform.
+- [x] Test the pipeline using the OWL Cine Camera to verify plugin compatibility.
+- [x] Trigger an empty processed topic event to test the fallback to raw topics.
 aw topics.
 
 ### 7. Documentation & User Guide (Assigned to: Technical Writing Agent)

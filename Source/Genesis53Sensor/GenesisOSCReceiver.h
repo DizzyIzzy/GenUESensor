@@ -19,7 +19,11 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 
-public:	
+public:
+	// Master enable/disable toggle - can be changed in editor or at runtime
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="OSC Configuration")
+	bool bEnabled = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="OSC Configuration")
 	FString ReceiveIP = TEXT("127.0.0.1");
 
@@ -53,6 +57,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Parsed Data|Camera 1")
 	FRotator Camera1Rotation = FRotator::ZeroRotator;
 
+	// Status & Warning Information
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Status")
+	FString LastWarningMessage = TEXT("");
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Status")
+	double LastDataReceivedTime = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Status")
+	bool bIsReceivingData = false;
+
 	// ---- Live Wiring ----
 	// Drag the CesiumGeoreference actor from the Outliner into this slot.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Genesis Wiring")
@@ -61,6 +75,16 @@ public:
 	// Drag the OWL Cine Camera actor from the Outliner into this slot.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Genesis Wiring")
 	AActor* Camera1Actor = nullptr;
+
+	// Runtime control functions
+	UFUNCTION(BlueprintCallable, Category="Genesis Control")
+	void SetEnabled(bool bNewEnabled);
+
+	UFUNCTION(BlueprintCallable, Category="Genesis Control")
+	bool IsEnabled() const { return bEnabled; }
+
+	UFUNCTION(BlueprintCallable, Category="Genesis Control")
+	void ToggleEnabled();
 
 private:
 	UPROPERTY()
@@ -72,6 +96,13 @@ private:
 	// Dirty flags — set by the OSC callback, consumed by Tick on the game thread
 	bool bGeoUpdated = false;
 	bool bCameraUpdated = false;
+
+	// Track whether we've started the receiver to avoid redundant starts
+	bool bReceiverStarted = false;
+
+	// Internal helper functions
+	void StartReceiver();
+	void StopReceiver();
 
 	UFUNCTION()
 	void OnOSCMessageReceived(const FOSCMessage& Message, const FString& IPAddress, int32 Port);

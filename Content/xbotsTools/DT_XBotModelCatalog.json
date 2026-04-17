@@ -1,0 +1,116 @@
+[
+	{
+		"Name": "AZOR",
+		"Mesh": "/Game/xbotsTools/models/azor/azor.azor",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "CORVO",
+		"Mesh": "/Game/xbotsTools/models/shahed/ShahedDrone.ShahedDrone",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "GAVIOTA",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "HAVRON",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "STORK",
+		"Mesh": "/Game/xbotsTools/models/stork/storkPlane.storkPlane",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "BUZZARD",
+		"Mesh": "/Game/xbotsTools/models/buffalo/buff46.buff46",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "COLT",
+		"Mesh": "/Game/xbotsTools/models/colt/colt.colt",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "BLOWFISH",
+		"Mesh": "/Game/xbotsTools/models/blowfish/blowfishBlimp.blowfishBlimp",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "VULPE",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "MANTA",
+		"Mesh": "/Game/xbotsTools/models/venator/venator.venator",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "PANTHER",
+		"Mesh": "/Game/xbotsTools/models/panther/panther.panther",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "VENATOR",
+		"Mesh": "/Game/xbotsTools/models/venator/venator.venator",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 1.0, "G": 1.0, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "TIBURON",
+		"Mesh": "/Game/xbotsTools/models/tiburon/jenskiboat.jenskiboat",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.0, "G": 0.4, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "MK7",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.0, "G": 0.4, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "MONTEREY",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.0, "G": 0.4, "B": 1.0, "A": 1.0 }
+	},
+	{
+		"Name": "ANANSE",
+		"Mesh": "/Game/xbotsTools/models/ananse/mrzr.mrzr",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.6, "G": 0.4, "B": 0.2, "A": 1.0 }
+	},
+	{
+		"Name": "CHEROOT",
+		"Mesh": "/Game/xbotsTools/models/cheroot/cherootMTX.cherootMTX",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.6, "G": 0.4, "B": 0.2, "A": 1.0 }
+	},
+	{
+		"Name": "KODIAK",
+		"Mesh": "/Game/xbotsTools/models/horten/horten.horten",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.6, "G": 0.4, "B": 0.2, "A": 1.0 }
+	},
+	{
+		"Name": "PONDEROSA",
+		"Mesh": "/Game/xbotsTools/models/ponderosa/ponderosa.ponderosa",
+		"Scale": { "X": 1.0, "Y": 1.0, "Z": 1.0 },
+		"FallbackColor": { "R": 0.6, "G": 0.4, "B": 0.2, "A": 1.0 }
+	}
+]
